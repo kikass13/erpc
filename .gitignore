@@ -65,6 +65,7 @@ ncscope.*
 workspace
 .BUILD*
 ~*
+build/
 
 # Windows project stuff
 *.suo
