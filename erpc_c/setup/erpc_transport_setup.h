@@ -31,6 +31,8 @@ typedef void (*rpmsg_ready_cb)(void);
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __cplusplus
+#include <queue>
+
 extern "C" {
 #endif
 
@@ -357,6 +359,10 @@ erpc_transport_t erpc_transport_usb_cdc_init(void *serialHandle, void *serialCon
 //@}
 
 //@}
+
+
+erpc_transport_t erpc_transport_fifo_init(std::queue<uint8_t>* receiveBuffer, std::queue<uint8_t>* sendBuffer);
+
 
 #ifdef __cplusplus
 }

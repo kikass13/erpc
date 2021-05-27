@@ -63,6 +63,9 @@ if("${OS}" STREQUAL "linux")
     ${CMAKE_CURRENT_SOURCE_DIR}/erpc_c/transports/erpc_tcp_transport.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/erpc_c/setup/erpc_setup_tcp.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/erpc_c/setup/erpc_client_setup.cpp
+    
+    ${CMAKE_CURRENT_SOURCE_DIR}/erpc_c/setup/erpc_setup_fifo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/erpc_c/transports/erpc_fifo_transport.cpp
   )
 endif()
 
