@@ -142,6 +142,11 @@
 //! Uncomment for using pre post default callback feature.
 //#define ERPC_PRE_POST_ACTION_DEFAULT (ERPC_PRE_POST_ACTION_DEFAULT_ENABLED)
 
+/// kikass13:
+/// define some stuff for myself:
+#define ERPC_DEFAULT_BUFFER_SIZE (256U)
+#define ERPC_DEFAULT_BUFFERS_COUNT (10U)
+
 /*! @} */
 #endif // _ERPC_CONFIG_H_
 ////////////////////////////////////////////////////////////////////////////////

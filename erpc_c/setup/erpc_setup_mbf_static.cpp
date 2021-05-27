@@ -39,9 +39,9 @@ public:
      * @brief Constructor.
      */
     StaticMessageBufferFactory(void)
-#if !ERPC_THREADS_IS(NONE)
-    : m_semaphore(1)
-#endif
+// #if !ERPC_THREADS_IS(NONE)
+//     : m_semaphore(1)
+// #endif
     {
         (void)memset(m_freeBufferBitmap, 0xff, ERPC_DEFAULT_BUFFERS_COUNT >> 3);
         (void)memset(m_buffers, 0, ERPC_DEFAULT_BUFFERS_COUNT * ERPC_BUFFER_SIZE_UINT8);
@@ -60,9 +60,9 @@ public:
     virtual MessageBuffer create(void)
     {
         uint8_t idx = 0;
-#if !ERPC_THREADS_IS(NONE)
-        m_semaphore.get();
-#endif
+// #if !ERPC_THREADS_IS(NONE)
+//         m_semaphore.get();
+// #endif
         while (((m_freeBufferBitmap[idx >> 3U] & (1U << (idx & 0x7U))) == 0U) && (idx < ERPC_DEFAULT_BUFFERS_COUNT))
         {
             idx++;
@@ -71,9 +71,9 @@ public:
         assert(idx < ERPC_DEFAULT_BUFFERS_COUNT);
 
         m_freeBufferBitmap[idx >> 3U] &= ~(1U << (idx & 0x7U));
-#if !ERPC_THREADS_IS(NONE)
-        m_semaphore.put();
-#endif
+// #if !ERPC_THREADS_IS(NONE)
+//         m_semaphore.put();
+// #endif
 
         uint8_t *buf;
         buf = (uint8_t *)m_buffers[idx];
@@ -94,9 +94,9 @@ public:
         if (tmp != NULL)
         {
             uint8_t idx = 0;
-#if !ERPC_THREADS_IS(NONE)
-            m_semaphore.get();
-#endif
+// #if !ERPC_THREADS_IS(NONE)
+//             m_semaphore.get();
+// #endif
             while ((idx < ERPC_DEFAULT_BUFFERS_COUNT) && (tmp != (uint8_t *)m_buffers[idx]))
             {
                 idx++;
@@ -105,9 +105,9 @@ public:
             {
                 m_freeBufferBitmap[idx >> 3U] |= 1U << (idx & 0x7U);
             }
-#if !ERPC_THREADS_IS(NONE)
-            m_semaphore.put();
-#endif
+// #if !ERPC_THREADS_IS(NONE)
+//             m_semaphore.put();
+// #endif
         }
     }
 
