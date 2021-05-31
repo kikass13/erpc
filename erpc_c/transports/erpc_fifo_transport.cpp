@@ -47,6 +47,10 @@ erpc_status_t FifoTransport::connectClient(void)
     return status;
 }
 
+bool FifoTransport::hasMessage(void){
+    return receiveBuffer_->size() > 0;
+}
+
 
 #define TIMEOUT_DURATION 100ms
 erpc_status_t FifoTransport::underlyingReceive(uint8_t *data, uint32_t size)

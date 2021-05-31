@@ -70,6 +70,9 @@ protected:
      * @retval #kErpcStatus_ReceiveFailed When reading data ends with error.
      * @retval #kErpcStatus_ConnectionClosed Peer closed the connection.
      */
+
+    virtual bool hasMessage(void) override;
+
     virtual erpc_status_t underlyingReceive(uint8_t *data, uint32_t size);
 
     /*!
