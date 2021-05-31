@@ -13,7 +13,6 @@
 // #include <iostream>
 #include <string>
 #include <chrono>
-#include <thread>
 using namespace std::chrono_literals;
 
 
@@ -70,8 +69,8 @@ erpc_status_t FifoTransport::underlyingReceive(uint8_t *data, uint32_t size)
             timeout = true;
             break;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(TIMEOUT_DURATION/10));
     }
+    
     
     if(timeout){
         status = kErpcStatus_Timeout;
