@@ -13,6 +13,8 @@ if(WIN32)
 elseif(UNIX AND NOT APPLE)
   set(OS "linux")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror")
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(OS_LIBS pthread rt)
 elseif(APPLE)
   # This must come *before* linux or MacOSX will identify as Unix.
@@ -102,7 +104,8 @@ target_include_directories(erpc PUBLIC
 message("LIB_DIR: ${ERPC_LIB_INSTALL_DIR}")
 
 install(TARGETS erpc EXPORT erpcConfig DESTINATION ${ERPC_LIB_INSTALL_DIR})
-#install(EXPORT erpcConfig DESTINATION ${CMAKE_CURRENT_LIST_DIR}/erpc/cmake)
+#install(EXPORT erpcConfig DESTINATION ${CMAKE_INSTALL_DATA_DIR}/erpc/cmake)
+install(EXPORT erpcConfig DESTINATION ${ERPC_LIB_INSTALL_DIR}/erpc/cmake)
 
 install(FILES
   ${ERPC_CONFIG_HEADERS}
