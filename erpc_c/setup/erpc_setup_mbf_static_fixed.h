@@ -33,21 +33,21 @@ class StaticFixedMessageBufferFactory : public MessageBufferFactory
 private:
     static constexpr std::array<bool, BUFFER_COUNT> init_free_buffer_bitmap() {
         std::array<bool, BUFFER_COUNT> a{};
-        for(int i = 0; i < BUFFER_COUNT; i++) {
+        for(size_t i = 0; i < BUFFER_COUNT; i++) {
             a[i] = true;
         }
         return a;
     };
     template<typename T>
     static constexpr void init_buffer(T* b) {
-        for(int j = 0; j < WORD_COUNT; j++){
+        for(size_t j = 0; j < WORD_COUNT; j++){
                 b[j] = T{0};
         }
         return;
     };
     static constexpr std::array<std::array<WORD_SIZE, WORD_COUNT>, BUFFER_COUNT> init_buffers() {
         std::array<std::array<WORD_SIZE, WORD_COUNT>, BUFFER_COUNT> bufs = {{}};
-        for(int i = 0; i < BUFFER_COUNT; i++) {
+        for(size_t i = 0; i < BUFFER_COUNT; i++) {
             init_buffer(bufs[i].data());
         }
         return bufs;
@@ -66,7 +66,7 @@ public:
     {
         WORD_SIZE* bufPtr = nullptr;
         /// check free buffers and return first free one
-        for(int i = 0; i < BUFFER_COUNT; i++){
+        for(size_t i = 0; i < BUFFER_COUNT; i++){
             bool free = free_buffer_bitmap_[i];
             if(free)
             {
@@ -93,7 +93,7 @@ public:
         if (bufPtr != nullptr)
         {
             // check buf ptr against all current buffers to see which one it was
-            for(int i = 0; i < BUFFER_COUNT; i++)
+            for(size_t i = 0; i < BUFFER_COUNT; i++)
             {
                 uint8_t* internalBufPtr = static_cast<uint8_t*>(buffers_[i].data());
                 if(bufPtr == internalBufPtr){
