@@ -24,8 +24,7 @@ static bool i = true;
 ////////////////////////////////////////////////////////////////////////////////
 // Code
 ////////////////////////////////////////////////////////////////////////////////
-
-erpc_transport_t erpc_transport_fifo_init(std::queue<uint8_t>* receiveBuffer, std::queue<uint8_t>* sendBuffer)
+erpc_transport_t erpc_transport_fifo_init(erpc::Buffer* receiveBuffer, erpc::Buffer* sendBuffer)
 {
     erpc_transport_t transport;
     if(i){

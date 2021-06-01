@@ -34,7 +34,7 @@ using namespace erpc;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-FifoTransport::FifoTransport(std::queue<uint8_t>* receiveBuffer, std::queue<uint8_t>* sendBuffer)
+FifoTransport::FifoTransport(Buffer* receiveBuffer, Buffer* sendBuffer)
 : receiveBuffer_(receiveBuffer), sendBuffer_(sendBuffer)
 {
 }
@@ -64,7 +64,12 @@ erpc_status_t FifoTransport::underlyingReceive(uint8_t *data, uint32_t size)
     /// so the response has to be given directly via the streaming process
     // if(receiveBuffer_->size() >= size)
     auto now = std::chrono::high_resolution_clock::now();
-    while(receiveBuffer_->size() == 0){
+    // we could wait for the first byte to be send ... buz that would mean we would have to implement read/write
+    // mutexes, so that there is no race condition (mainly calling front/pop before the data was sent)
+    //while(receiveBuffer_->size() == 0){
+    // but i guess we will wait for all data to be ready instead (fifo size == expected size)
+    // this is slower, but probably safer :D
+    while(receiveBuffer_->size() < size){
         /// ....
         auto t = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t - now);

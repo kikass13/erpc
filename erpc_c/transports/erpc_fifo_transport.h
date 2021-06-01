@@ -14,6 +14,8 @@
 // #include "erpc_threading.h"
 
 #include <queue>
+#include <cstddef>
+#include <cassert>
 
 /*!
  * @addtogroup fifo_transport
@@ -26,6 +28,65 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace erpc {
+
+
+
+/// kikass13:
+/// Is a CRTP pattern a better solution here?
+class Buffer{
+public:
+    virtual size_t capacity() const = 0;
+    virtual bool empty() const = 0;
+    virtual size_t size() const = 0;    
+    virtual void clear() = 0;
+    virtual void push(const uint8_t& item) = 0;
+    virtual const uint8_t& front() = 0;
+    virtual void pop() = 0;
+
+};
+
+template<class T, int N>
+class RingBuffer : public Buffer{
+public:
+    RingBuffer() { clear(); }
+    size_t capacity() const { return N; }
+    bool empty() const { return head_ == tail_; }
+    size_t size() const {
+        return head_ >= tail_ ?
+            head_ - tail_ :
+            BUFSIZE - (tail_ - head_);
+    }
+  void push(const T& item) {
+        buffer_[head_] = item;
+        advance(head_);
+        if (head_ == tail_) {
+            advance(tail_); // Drop oldest entry, keep rest.
+        }
+    }
+    void pop() {
+        advance(tail_);
+    }
+    const T& front() {
+        assert(!empty());
+        //size_t old_tail = tail_;
+        //advance(tail_);
+        //return buffer_[old_tail];
+        return buffer_[tail_];
+    }
+    void clear() { tail_ = head_ = 0U; }
+ 
+private:
+    /// well mutexes are slow ... lets try it without ;D
+    //std::mutex dataMutex_;
+    static const size_t BUFSIZE = N + 1U;
+    void advance(size_t& value) { value = (value + 1) % BUFSIZE; }
+ 
+    T buffer_[BUFSIZE];
+    size_t head_;
+    size_t tail_;
+};
+ 
+
 /*!
  * @brief fifo transport.
  *
@@ -41,7 +102,7 @@ public:
      *
      * @param[in] buffer 
      */
-    FifoTransport(std::queue<uint8_t>* receiveBuffer, std::queue<uint8_t>* sendBuffer);
+    FifoTransport(Buffer* receiveBuffer, Buffer* sendBuffer);
 
     /*!
      * @brief FifoTransport destructor
@@ -49,8 +110,8 @@ public:
     virtual ~FifoTransport(void);
 
 protected:
-    std::queue<uint8_t>* receiveBuffer_;
-    std::queue<uint8_t>* sendBuffer_;
+    Buffer* receiveBuffer_;
+    Buffer* sendBuffer_;
 
     /*!
      * @brief This function connect client to the server.
