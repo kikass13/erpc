@@ -31,12 +31,6 @@ typedef void (*rpmsg_ready_cb)(void);
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __cplusplus
-#include <queue>
-
-#include "erpc_fifo_transport.h"
-
-erpc_transport_t erpc_transport_fifo_init(erpc::Buffer* receiveBuffer, erpc::Buffer* sendBuffer);
-
 
 extern "C" {
 #endif

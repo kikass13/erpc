@@ -12,8 +12,6 @@
 
 #include "erpc_transport_setup.h"
 
-#include "erpc_setup_mbf_static_fixed.h"
-
 /*!
  * @addtogroup message_buffer_factory_setup
  * @{
@@ -30,19 +28,6 @@ typedef struct ErpcMessageBufferFactory *erpc_mbf_t;
 ////////////////////////////////////////////////////////////////////////////////
 // API
 ////////////////////////////////////////////////////////////////////////////////
-
-/*!
- * @brief Create MessageBuffer factory which is using static fixed allocated buffers.
- */
-template <size_t BUFFER_COUNT, size_t WORD_COUNT, class WORD_SIZE=uint8_t>
-erpc_mbf_t erpc_mbf_static_fixed_init(void)
-{   
-    static ManuallyConstructed<StaticFixedMessageBufferFactory<BUFFER_COUNT, WORD_COUNT, WORD_SIZE>> s_msgFactory;
-    s_msgFactory.construct();
-    return reinterpret_cast<erpc_mbf_t>(s_msgFactory.get());
-    return nullptr;
-}
-
 #ifdef __cplusplus
 extern "C" {
 #endif
