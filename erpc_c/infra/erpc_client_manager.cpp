@@ -38,13 +38,14 @@ RequestContext ClientManager::createRequest(bool isOneway)
     return RequestContext(++m_sequence, codec, isOneway);
 }
 
-void ClientManager::performRequest(RequestContext &request)
+bool ClientManager::performRequest(RequestContext &request)
 {
     // Check the codec status
-    if (kErpcStatus_Success != (request.getCodec()->getStatus()))
+    
+    if (kErpcStatus_Success != (request.getCodec()->getStatus()) && (kErpcStatus_Pending != (request.getCodec()->getStatus())))
     {
         // Do not perform the request
-        return;
+        return false;
     }
 
 #if ERPC_NESTED_CALLS
@@ -57,15 +58,16 @@ void ClientManager::performRequest(RequestContext &request)
     return performClientRequest(request);
 }
 
-void ClientManager::performClientRequest(RequestContext &request)
+bool ClientManager::performClientRequest(RequestContext &request)
 {
 #if ERPC_NESTED_CALLS_DETECTION
     if (!request.isOneway() && nestingDetection)
     {
         request.getCodec()->updateStatus(kErpcStatus_NestedCallFailure);
-        return;
+        return false;
     }
 #endif
+
 
     erpc_status_t err;
 
@@ -74,52 +76,61 @@ void ClientManager::performClientRequest(RequestContext &request)
     if (err)
     {
         request.getCodec()->updateStatus(err);
-        return;
+        return false;
     }
 #endif
 
-    // Send invocation request to server.
-    err = m_transport->send(request.getCodec()->getBuffer());
-    if (err)
+    if(request.getState() == RequestContextState::VALID)
     {
-        request.getCodec()->updateStatus(err);
-        return;
+         // Send invocation request to server.
+        err = m_transport->send(request.getCodec()->getBuffer());
+        if (err)
+        {
+            request.getCodec()->updateStatus(err);
+            return false;
+        }
+        request.setState(RequestContextState::SENT);
     }
 
     // If the request is oneway, then there is nothing more to do.
     if (!request.isOneway())
     {
-        // Receive reply.
-        err = m_transport->receive(request.getCodec()->getBuffer());
-        if (err)
+        if(request.getState() == RequestContextState::SENT || request.getState() == RequestContextState::PENDING)
         {
-            request.getCodec()->updateStatus(err);
-            return;
-        }
+            // Receive reply.
+            err = m_transport->receive(request.getCodec()->getBuffer());
+            if (err)
+            {
+                request.getCodec()->updateStatus(err);
+                if(err == kErpcStatus_Pending)
+                    request.setState(RequestContextState::PENDING);
+                return false;
+            }
 
 #if ERPC_MESSAGE_LOGGING
-        err = logMessage(request.getCodec()->getBuffer());
-        if (err)
-        {
-            request.getCodec()->updateStatus(err);
-            return;
-        }
+            err = logMessage(request.getCodec()->getBuffer());
+            if (err)
+            {
+                request.getCodec()->updateStatus(err);
+                return false;
+            }
 #endif
 
-        // Check the reply.
-        err = verifyReply(request);
-        if (err)
-        {
-            request.getCodec()->updateStatus(err);
-            return;
+            // Check the reply.
+            err = verifyReply(request);
+            if (err)
+            {
+                request.getCodec()->updateStatus(err);
+                return false;
+            }
         }
     }
-
-    return;
+    request.setState(RequestContextState::DONE);
+    return true;
 }
 
 #if ERPC_NESTED_CALLS
-void ClientManager::performNestedClientRequest(RequestContext &request)
+bool ClientManager::performNestedClientRequest(RequestContext &request)
 {
     assert(m_transport && "transport/arbitrator not set");
 
