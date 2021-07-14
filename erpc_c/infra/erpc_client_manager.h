@@ -112,8 +112,8 @@ public:
      *
      * @param[in] request Request context to perform.
      */
-    virtual void performRequest(RequestContext &request);
-
+    virtual bool performRequest(RequestContext &request);
+    
     /*!
      * @brief This function releases request context.
      *
@@ -173,7 +173,7 @@ protected:
      *
      * @param[in] request Request context to perform.
      */
-    virtual void performClientRequest(RequestContext &request);
+    virtual bool performClientRequest(RequestContext &request);
 
 #if ERPC_NESTED_CALLS
     /*!
@@ -183,7 +183,7 @@ protected:
      *
      * @param[in] request Request context to perform.
      */
-    virtual void performNestedClientRequest(RequestContext &request);
+    virtual bool performNestedClientRequest(RequestContext &request);
 #endif
 
     //! @brief Validate that an incoming message is a reply.
@@ -204,6 +204,17 @@ private:
     ClientManager &operator=(const ClientManager &other); //!< Disable copy ctor.
 };
 
+
+enum RequestContextState
+{
+    INVALID = 0,
+    VALID = 1,
+    SENT = 2,
+    PENDING = 3,
+    DONE = 4,
+};
+ 
+
 /*!
  * @brief Encapsulates all information about a request.
  *
@@ -212,6 +223,11 @@ private:
 class RequestContext
 {
 public:
+    
+    RequestContext(): m_state(RequestContextState::INVALID)
+    {
+    }
+
     /*!
      * @brief Constructor.
      *
@@ -225,6 +241,7 @@ public:
     : m_sequence(sequence)
     , m_codec(codec)
     , m_oneway(argIsOneway)
+    , m_state(RequestContextState::VALID)
     {
     }
 
@@ -256,10 +273,19 @@ public:
      */
     void setIsOneway(bool oneway) { m_oneway = oneway; }
 
+    /*!
+     * @brief Get if the request is valid
+     *
+     * @return True if the request is valid
+     */
+    RequestContextState getState() { return m_state;}
+    void setState(RequestContextState state) { m_state = state; }
+
 protected:
     uint32_t m_sequence; //!< Sequence number. To be sure that reply belong to current request.
     Codec *m_codec;      //!< Inout codec. Codec for receiving and sending data.
     bool m_oneway;       //!< When true, request context will be oneway type (only send data).
+    RequestContextState m_state;
 };
 
 } // namespace erpc
